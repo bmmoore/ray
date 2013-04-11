@@ -2,6 +2,7 @@ import Control.Monad
 import Data.Maybe
 import Data.Ord
 import Data.List
+import System.IO
 
 data Vec = Vec Double Double Double
   deriving Show
@@ -58,12 +59,13 @@ raster origin forward up right px py =
   | ix <- [0..px-1]] | iy <- [0..py-1]]
   
 pgmish :: Int -> Int -> [[Double]] -> String
-pgmish x y img = unlines $ ["P2",unwords [show x, show y],"65535"] ++ map (unwords . map pix) img
-  where pix d = show . max 0 . min 65535 $ floor (d * 65535)
+pgmish x y img = unlines ["P5",unwords [show x, show y],"65535"] ++ concatMap (concatMap pix) img
+  where pix d = bytes . max 0 . min 65535 $ floor (d * 65535)
+        bytes n = [toEnum (n `quot` 256), toEnum (n `rem` 256)]
         
 main =
-  writeFile "out.pgm" $
-  pgmish 400 400 (map (map (uncurry (trace scene 10))) (raster (Vec 0 0 0) (Vec 0 0 1) (Vec 0 0.5 0) (Vec 0.5 0 0) 400 400))
+  withBinaryFile "out.pgm" WriteMode $ \h -> hPutStr h $
+    pgmish 400 400 (map (map (uncurry (trace scene 10))) (raster (Vec 0 0 0) (Vec 0 0 1) (Vec 0 0.5 0) (Vec 0.5 0 0) 400 400))
  where scene = [(Sphere 10 (Vec 0 0 30)) 0.1 1,
                 (Sphere 5 (Vec 10 0 30)) 0.1 0,
                 (Sphere 10 (Vec 0 20 0)) 0.1 0.5]
