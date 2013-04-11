@@ -4,7 +4,7 @@ import Data.Ord
 import Data.List
 import System.IO
 
-data Vec = Vec Double Double Double
+data Vec = Vec !Double !Double !Double
   deriving Show
 
 dot :: Vec -> Vec -> Double
@@ -18,7 +18,7 @@ normalize v = scale (1/norm v) v
 diff (Vec x1 x2 x3) (Vec y1 y2 y3) = Vec (x1-y1) (x2-y2) (x3-y3)
 add  (Vec x1 x2 x3) (Vec y1 y2 y3) = Vec (x1+y1) (x2+y2) (x3+y3)
 
-data Sphere = Sphere Double Vec Double Double
+data Sphere = Sphere !Double !Vec !Double !Double
 
 hit :: Vec -> Vec -> Sphere -> Maybe (Double, Vec, Vec)
 hit x d (Sphere r center _ _) = do
